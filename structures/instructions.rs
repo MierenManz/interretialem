@@ -1,9 +1,10 @@
+use super::ValType;
 use super::descriptors::Block;
 use super::descriptors::MemArg;
 
-pub const fn two_byte(a: u8, b: u8) -> u16 {
-    ((a as u16) << 8) | (b as u16)
-}
+// pub const fn two_byte(a: u8, b: u8) -> u16 {
+//     ((a as u16) << 8) | (b as u16)
+// }
 
 type TypeIndex = u32;
 type FuncIndex = u32;
@@ -14,7 +15,8 @@ type DataIndex = u32;
 type LocalIndex = u32;
 type LabelIndex = u32;
 
-#[repr(u16)]
+#[derive(Debug)]
+#[repr(u8)]
 pub enum WasmInstruction {
     // Control flow instruction
     Unreachable = 0x00,
@@ -36,7 +38,6 @@ pub enum WasmInstruction {
     Drop = 0x1A,
     Select = 0x1B,
     SelectT = 0x1C,
-
     // Variable Instructions
     LocalGet(LocalIndex) = 0x20,
     LocalSet(LocalIndex) = 0x21,
@@ -47,12 +48,12 @@ pub enum WasmInstruction {
     // Table Instructions
     TableGet(TableIndex) = 0x25,
     TableSet(TableIndex) = 0x26,
-    TableInit(ElemIndex, TableIndex) = two_byte(0xFC, 12),
-    ElemDrop(ElemIndex) = two_byte(0xFC, 13),
-    TableCopy(TableIndex, TableIndex) = two_byte(0xFC, 14),
-    TableGrow(TableIndex) = two_byte(0xFC, 15),
-    TableSize(TableIndex) = two_byte(0xFC, 16),
-    TableFill(TableIndex) = two_byte(0xFC, 17),
+    // TableInit(ElemIndex, TableIndex) = two_byte(0xFC, 12),
+    // ElemDrop(ElemIndex) = two_byte(0xFC, 13),
+    // TableCopy(TableIndex, TableIndex) = two_byte(0xFC, 14),
+    // TableGrow(TableIndex) = two_byte(0xFC, 15),
+    // TableSize(TableIndex) = two_byte(0xFC, 16),
+    // TableFill(TableIndex) = two_byte(0xFC, 17),
 
     // Memory Instructions
     I32Load(MemArg) = 0x28,
@@ -78,12 +79,12 @@ pub enum WasmInstruction {
     I64Store8(MemArg) = 0x3C,
     I64Store16(MemArg) = 0x3D,
     I64Store32(MemArg) = 0x3E,
-    MemorySize = two_byte(0x3F, 0x00),
-    MemoryGrow = two_byte(0x40, 0x00),
-    MemoryInit(DataIndex) = two_byte(0xFC, 8),
-    DataDrop(DataIndex) = two_byte(0xFC, 9),
-    MemoryCopy = two_byte(0xFC, 10),
-    MemoryFill = two_byte(0xFC, 11),
+    // MemorySize = two_byte(0x3F, 0x00),
+    // MemoryGrow = two_byte(0x40, 0x00),
+    // MemoryInit(DataIndex) = two_byte(0xFC, 8),
+    // DataDrop(DataIndex) = two_byte(0xFC, 9),
+    // MemoryCopy = two_byte(0xFC, 10),
+    // MemoryFill = two_byte(0xFC, 11),
 
     // Numeric Instructions
     I32Const(i32) = 0x41,

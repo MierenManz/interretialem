@@ -2,12 +2,12 @@ pub mod descriptors;
 pub mod instructions;
 pub mod types;
 
-use descriptors::*;
-use types::*;
+pub use descriptors::*;
+pub use types::*;
 
 type Section<T> = Vec<T>;
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct DecodedModule {
     pub(crate) magic_cookie: [u8; 4],
     pub(crate) version_bytes: [u8; 4],
@@ -19,7 +19,7 @@ pub struct DecodedModule {
     pub(crate) global_section: Section<Global>,
     pub(crate) export_section: Section<Export>,
     pub(crate) start_section: Option<u32>,
-    // pub(crate) element_section: Section<Element>,
+    pub(crate) _element_section: (),
     pub(crate) code_section: Section<CodeBody>,
     pub(crate) data_section: Section<Data>,
     pub(crate) data_count: Option<u32>,

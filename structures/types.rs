@@ -1,3 +1,4 @@
+#[derive(Debug)]
 #[repr(u8)]
 pub enum NumType {
     I32 = 0x7F,
@@ -21,6 +22,7 @@ impl TryFrom<u8> for NumType {
     }
 }
 
+#[derive(Debug)]
 #[repr(u8)]
 pub enum VecType {
     V128 = 0x7B,
@@ -37,6 +39,7 @@ impl TryFrom<u8> for VecType {
     }
 }
 
+#[derive(Debug)]
 #[repr(u8)]
 pub enum RefType {
     FuncRef = 0x70,
@@ -56,6 +59,7 @@ impl TryFrom<u8> for RefType {
     }
 }
 
+#[derive(Debug)]
 pub enum ValType {
     Num(NumType),
     Vec(VecType),
@@ -83,31 +87,37 @@ impl TryFrom<u8> for ValType {
 
 pub type ResultType = Vec<ValType>;
 
+#[derive(Debug)]
 pub struct FuncType {
     pub params: ResultType,
     pub result: ResultType,
 }
 
+#[derive(Debug)]
 pub struct Limits {
     pub min: u32,
     pub max: Option<u32>,
 }
 
+#[derive(Debug)]
 pub struct MemoryType {
     pub min: u16,
     pub max: Option<u16>,
 }
 
+#[derive(Debug)]
 pub struct TableType {
     pub kind: RefType,
     pub limits: Limits,
 }
 
+#[derive(Debug)]
 pub struct GlobalType {
     pub kind: ValType,
     pub is_mut: bool,
 }
 
+#[derive(Debug)]
 pub enum BlockType {
     Void,
     Value(ValType),

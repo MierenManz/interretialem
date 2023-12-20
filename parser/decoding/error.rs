@@ -1,11 +1,6 @@
 use leb128::read;
 use std::fmt::Debug;
 
-pub enum ValidationError {
-    BadCookie,
-    UnsupportedWasmVersion,
-}
-
 #[derive(Debug)]
 pub enum DecodingError {
     UnknownValType,
