@@ -1,0 +1,31 @@
+CLI => Main code for executing anything
+Runtime => Has the actual runtime and structs needed for execution
+IR => optimized representation for the runtime
+Parser => All the code to
+1. decode a wasm binary into a decoded module
+2. validate the decoded module and 
+3. parsing it into a `IR` module
+
+Structures => Decoded representation of the wasm binary
+
+Dependencies
+CLI:
+- Runtime
+- IR
+- Parser
+- Structures
+
+Runtime:
+- IR
+- Parser
+- Structures
+
+IR:
+- No Dependencies
+
+Parser:
+- Structures
+- LEB128 (varint)
+
+Structures:
+- No Dependencies
