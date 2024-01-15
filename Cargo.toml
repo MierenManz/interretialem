@@ -7,7 +7,6 @@ edition = "2021"
 
 [[bin]]
 name = "interretialem"
-path = "main.rs"
 
 [dependencies]
 leb128 = "0.2.5"

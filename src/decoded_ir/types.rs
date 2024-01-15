@@ -1,6 +1,5 @@
+use crate::error::DecodingError;
 use std::num::NonZeroU32;
-
-use super::DecodingError;
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum NumType {
@@ -27,7 +26,7 @@ impl TryFrom<u8> for NumType {
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum ValType {
-    Num(NumType)
+    Num(NumType),
 }
 
 impl TryFrom<u8> for ValType {
@@ -41,42 +40,16 @@ impl TryFrom<u8> for ValType {
 #[derive(Clone)]
 pub(crate) struct ResultType(Vec<ValType>);
 impl ResultType {
-    pub(crate) fn new() -> Self {
-        Self(vec!())
-    }
-
-    pub(crate) fn with_capacity(capacity: u32) -> Self {
-        Self(Vec::with_capacity(capacity as usize))
-    }
-
-    pub(crate) fn push<V: Into<ValType>>(&mut self, v: V) -> Result<(), ()> {
-        if self.0.len() == u32::MAX as usize {
-            return Err(())
-        }
-
-        self.0.push(v.into());
-
-        Ok(())
-    }
-
     pub(crate) fn arg_count(&self) -> u32 {
         self.0.len() as u32
     }
 }
-
 impl From<Vec<ValType>> for ResultType {
     fn from(value: Vec<ValType>) -> Self {
         Self(value)
     }
 }
-
 pub(crate) struct FuncType(ResultType, ResultType);
-impl From<ResultType> for FuncType {
-    fn from(value: ResultType) -> Self {
-        Self::from((value.clone(), value))
-    }
-}
-
 impl From<(ResultType, ResultType)> for FuncType {
     fn from(value: (ResultType, ResultType)) -> Self {
         Self(value.0, value.1)
@@ -85,8 +58,12 @@ impl From<(ResultType, ResultType)> for FuncType {
 
 pub(crate) struct Limits(NonZeroU32, Option<NonZeroU32>);
 impl Limits {
-    fn set_max(&mut self, max: NonZeroU32) {
+    pub(crate) fn set_max(&mut self, max: NonZeroU32) {
         self.1 = Some(max);
+    }
+
+    pub(crate) fn min_bigger(&self) -> bool {
+        self.1.is_some_and(|x| self.0 > x)
     }
 }
 impl From<NonZeroU32> for Limits {
@@ -100,21 +77,8 @@ impl TryFrom<u32> for Limits {
     fn try_from(value: u32) -> Result<Self, Self::Error> {
         match NonZeroU32::try_from(value) {
             Ok(v) => Ok(v.into()),
-            Err(_) => Err(DecodingError::ExpectedNonZero)
+            Err(_) => Err(DecodingError::ExpectedNonZero),
         }
     }
 }
 
-impl TryFrom<(u32, u32)> for Limits {
-    type Error = DecodingError;
-    fn try_from(value: (u32, u32)) -> Result<Self, Self::Error> {
-        if value.0 > value.1  {
-            return Err(DecodingError::MinBiggerThanMax)
-        }
-
-        let mut x: Limits = value.0.try_into()?;
-        x.set_max(NonZeroU32::try_from(value.1).unwrap());
-
-        Ok(x)
-    }
-}

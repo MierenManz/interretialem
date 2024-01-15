@@ -28,17 +28,11 @@ pub(crate) struct MemArg {
 
 impl MemArg {
     pub(crate) fn new(offset: u8) -> Self {
-        Self {
-            offset,
-            align: 0,
-        }
+        Self { offset, align: 0 }
     }
 
     pub(crate) fn with_alignment(offset: u8, align: u8) -> Self {
-        Self {
-            offset,
-            align
-        }
+        Self { offset, align }
     }
 }
 
@@ -51,17 +45,16 @@ impl Default for MemArg {
     }
 }
 
-
 #[derive(Debug)]
 #[repr(u16)]
-pub enum Instruction {
+pub(crate) enum Instruction {
     // Control flow instruction
     Unreachable = 0x00,
     Nop = 0x01,
     Block(Block) = 0x02,
     Loop(Block) = 0x03,
     If(Block) = 0x04,
-    Else(Block) = 0x05,
+    Else = 0x05,
     End = 0x0B,
     Br(LabelIndex) = 0x0C,
     BrIf(LabelIndex) = 0x0D,
@@ -70,6 +63,8 @@ pub enum Instruction {
     Return = 0x0F,
     Call(FuncIndex) = 0x10,
     CallIndirect(TableIndex, TypeIndex) = 0x11,
+
+    // RefNull()
 
     // Parametric Instructions
     Drop = 0x1A,

@@ -16,7 +16,7 @@ macro_rules! impl_index {
 
         impl From<$name> for u32 {
             fn from(value: $name) -> Self {
-                value.0
+                value.as_u32()
             }
         }
     };

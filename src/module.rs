@@ -1,12 +1,10 @@
-mod error;
-
-use error::ValidationError;
-use crate::decoded_ir::FuncType;
-use crate::decoded_ir::Limits;
-use crate::decoded_ir::ExportDescriptor;
-use crate::decoded_ir::CodeBlock;
 use crate::decoded_ir::indices::FuncIndex;
 use crate::decoded_ir::indices::TypeIndex;
+use crate::decoded_ir::CodeBlock;
+use crate::decoded_ir::ExportDescriptor;
+use crate::decoded_ir::types::Limits;
+use crate::decoded_ir::types::FuncType;
+use crate::error::ValidationError;
 
 type Function = ();
 type Memory = ();
@@ -22,7 +20,7 @@ pub(crate) struct Module<'a> {
     // datas: Box<[u8]>,
     // datas: Vec<(u32, u32)>,
     start: Option<&'a Function>,
-    exports: Box<[Export]>
+    exports: Box<[Export]>,
 }
 
 pub(crate) struct ModuleBuilder {
@@ -35,9 +33,8 @@ pub(crate) struct ModuleBuilder {
     exports: Vec<ExportDescriptor>,
     start: Option<FuncIndex>,
     // elems: (),
-    code: Vec<CodeBlock>
-    // datas: (),
-    // data_count: u32
+    code: Vec<CodeBlock>, // datas: (),
+                          // data_count: u32
 }
 
 impl ModuleBuilder {
