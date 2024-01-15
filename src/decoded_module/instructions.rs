@@ -1,129 +1,68 @@
+use binrw::binread;
 use super::indices::*;
-use super::ValType;
+use super::types::{ValType, RefType};
+use super::values::parse_varuint32;
 
-#[derive(Debug, Clone, Copy)]
-pub(crate) enum Block {
-    Void,
+#[binread]
+#[repr(u8)]
+pub(crate) enum BlockType {
+    Void = 0x40,
     Value(ValType),
     Type(TypeIndex),
 }
 
-impl From<ValType> for Block {
-    fn from(value: ValType) -> Self {
-        Self::Value(value)
-    }
+#[binread]
+pub(crate) struct BrTable {
+    #[br(temp, parse_with = parse_varuint32)]
+    v_len: u32,
+    #[br(temp, count = v_len as usize)]
+    t_vec: Vec<LabelIndex>,
+    #[br(calc = t_vec.into_boxed_slice() )]
+    branches: Box<[LabelIndex]>,
 }
-
-impl From<TypeIndex> for Block {
-    fn from(value: TypeIndex) -> Self {
-        Self::Type(value)
-    }
-}
-
-#[derive(Debug, Clone, Copy)]
-pub(crate) struct MemArg {
-    offset: u8,
-    align: u8,
-}
-
-impl MemArg {
-    pub(crate) fn new(offset: u8) -> Self {
-        Self { offset, align: 0 }
-    }
-
-    pub(crate) fn with_alignment(offset: u8, align: u8) -> Self {
-        Self { offset, align }
-    }
-}
-
-impl Default for MemArg {
-    fn default() -> Self {
-        Self {
-            offset: 0,
-            align: 0,
+impl BrTable {
+    pub(crate) fn branch(&self, index: u32) -> Option<LabelIndex> {
+        if index < (self.branches.len() - 1) as u32 {
+            Some(self.branches[index as usize])
+        } else {
+            None
         }
     }
+
+    pub(crate) fn default(&self) -> LabelIndex {
+        self.branch((self.branches.len() - 1) as u32).unwrap()
+    }
 }
 
-#[derive(Debug)]
-#[repr(u16)]
-pub(crate) enum Instruction {
-    // Control flow instruction
+
+#[binread]
+#[repr(u8)]
+pub(crate) enum OneByteInstruction {
     Unreachable = 0x00,
     Nop = 0x01,
-    Block(Block) = 0x02,
-    Loop(Block) = 0x03,
-    If(Block) = 0x04,
+    Block(BlockType) = 0x02,
+    Loop(BlockType) = 0x03,
+    If(BlockType) = 0x04,
     Else = 0x05,
     End = 0x0B,
-    Br(LabelIndex) = 0x0C,
-    BrIf(LabelIndex) = 0x0D,
-    /// Last index of the slice is the default
-    BrTable(Box<[LabelIndex]>) = 0x0E,
-    Return = 0x0F,
-    Call(FuncIndex) = 0x10,
-    CallIndirect(TableIndex, TypeIndex) = 0x11,
-
-    // RefNull()
-
-    // Parametric Instructions
+    Br(LabelIndex),
+    BrIf(LabelIndex),
+    BrTable(BrTable),
+    Return = 0xF,
+    Call(FuncIndex),
+    CallIndirect(TypeIndex, TableIndex),
+    RefNull(RefType) = 0xD0,
+    RefIsNull = 0xD1,
+    RefFunc(FuncIndex) = 0xD2,
     Drop = 0x1A,
     Select = 0x1B,
-    SelectT = 0x1C,
-    // Variable Instructions
+    // SelectT(Box<[ValType]>) = 0x1C,
     LocalGet(LocalIndex) = 0x20,
     LocalSet(LocalIndex) = 0x21,
     LocalTee(LocalIndex) = 0x22,
     GlobalGet(GlobalIndex) = 0x23,
     GlobalSet(GlobalIndex) = 0x24,
-
-    // Table Instructions
-    TableGet(TableIndex) = 0x25,
-    TableSet(TableIndex) = 0x26,
-    TableInit(ElemIndex, TableIndex) = 0xFC0C,
-    ElemDrop(ElemIndex) = 0xFC0D,
-    TableCopy(TableIndex, TableIndex) = 0xFC0E,
-    TableGrow(TableIndex) = 0xFC0F,
-    TableSize(TableIndex) = 0xFC10,
-    TableFill(TableIndex) = 0xFC11,
-
-    // Memory Instructions
-    I32Load(MemArg) = 0x28,
-    I64Load(MemArg) = 0x29,
-    F32Load(MemArg) = 0x2A,
-    F64Load(MemArg) = 0x2B,
-    I32Load8S(MemArg) = 0x2C,
-    I32Load8U(MemArg) = 0x2D,
-    I32Load16S(MemArg) = 0x2E,
-    I32Load16U(MemArg) = 0x2F,
-    I64Load8S(MemArg) = 0x30,
-    I64Load8U(MemArg) = 0x31,
-    I64Load16S(MemArg) = 0x32,
-    I64Load16U(MemArg) = 0x33,
-    I64Load32S(MemArg) = 0x34,
-    I64Load32U(MemArg) = 0x35,
-    I32Store(MemArg) = 0x36,
-    I64Store(MemArg) = 0x37,
-    F32Store(MemArg) = 0x38,
-    F64Store(MemArg) = 0x39,
-    I32Store8(MemArg) = 0x3A,
-    I32Store16(MemArg) = 0x3B,
-    I64Store8(MemArg) = 0x3C,
-    I64Store16(MemArg) = 0x3D,
-    I64Store32(MemArg) = 0x3E,
-    MemorySize = 0x3F00,
-    MemoryGrow = 0x4000,
-    MemoryInit(DataIndex) = 0xFC08,
-    DataDrop(DataIndex) = 0xFC09,
-    MemoryCopy = 0xFC0A,
-    MemoryFill = 0xFC0B,
-
-    // Numeric Instructions
-    I32Const(i32) = 0x41,
-    I64Const(i64) = 0x42,
-    F32Const(f32) = 0x43,
-    F64Const(f64) = 0x44,
-
+    
     I32Eqz = 0x45,
     I32Eq = 0x46,
     I32Ne = 0x47,
@@ -260,3 +199,4 @@ pub(crate) enum Instruction {
     I64Extends16S = 0xC3,
     I64Extends32S = 0xC4,
 }
+pub(crate) enum TwoByteInstruction {}

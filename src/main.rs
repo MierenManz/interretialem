@@ -1,8 +1,7 @@
 use std::fs::OpenOptions;
-mod decode;
-mod decoded_ir;
 mod error;
 mod module;
+mod decoded_module;
 
 fn main() {
     let mut open_options = OpenOptions::new();
