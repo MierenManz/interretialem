@@ -1,12 +1,13 @@
-use binrw::binread;
 use super::indices::*;
-use super::types::{ValType, RefType};
 use super::parsers::parse_varuint32;
+use super::types::{RefType, ValType};
+use binrw::binread;
 
 #[binread]
 #[repr(u8)]
 pub(crate) enum BlockType {
-    #[br(magic = 0x40u8)] Void,
+    #[br(magic = 0x40u8)]
+    Void,
     Value(ValType),
     Type(TypeIndex),
 }
@@ -39,7 +40,6 @@ pub(crate) struct MemArg {
     #[br(parse_with = parse_varuint32)]
     offset: u32,
 }
-
 
 // #[binread]
 // #[br(parse_with = )]

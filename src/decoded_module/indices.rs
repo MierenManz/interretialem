@@ -1,5 +1,5 @@
-use binrw::binread;
 use super::parsers::parse_varuint32;
+use binrw::binread;
 
 macro_rules! impl_idx {
     ($name:ident) => {

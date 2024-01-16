@@ -27,6 +27,9 @@ impl From<leb128::read::Error> for DecodingError {
 
 impl From<DecodingError> for Error {
     fn from(value: DecodingError) -> Self {
-        Self::Custom { pos: 0, err: Box::new(value) }
+        Self::Custom {
+            pos: 0,
+            err: Box::new(value),
+        }
     }
 }
