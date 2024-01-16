@@ -19,19 +19,6 @@ pub(crate) struct BrTable {
     #[br(count = v_len as usize, map = |x: Vec<LabelIndex>| x.into() )]
     branches: Box<[LabelIndex]>,
 }
-impl BrTable {
-    pub(crate) fn branch(&self, index: u32) -> Option<LabelIndex> {
-        if index < (self.branches.len() - 1) as u32 {
-            Some(self.branches[index as usize])
-        } else {
-            None
-        }
-    }
-
-    pub(crate) fn default(&self) -> LabelIndex {
-        self.branch((self.branches.len() - 1) as u32).unwrap()
-    }
-}
 
 #[binread]
 pub(crate) struct MemArg {
@@ -40,11 +27,3 @@ pub(crate) struct MemArg {
     #[br(parse_with = parse_varuint32)]
     offset: u32,
 }
-
-// #[binread]
-// #[br(parse_with = )]
-// pub(crate) enum Instruction {
-//     OneByteInstr(),
-//     BulkMemInstr(),
-//     SIMDInstr(),
-// }

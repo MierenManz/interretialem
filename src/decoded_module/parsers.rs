@@ -19,3 +19,12 @@ pub(crate) fn parse_varuint32() -> BinResult<u32> {
 }
 
 pub(crate) fn parse_varint64() {}
+
+#[binrw::parser(reader, endian)]
+pub(crate) fn parse_string() -> BinResult<String> {
+    let len = parse_varuint32(reader, endian, ())?;
+    let mut buf = Vec::with_capacity(len as usize);
+    reader.read_exact(&mut buf)?;
+
+    String::from_utf8(buf).or(Err(DecodingError::NonUTF8String.into()))
+}

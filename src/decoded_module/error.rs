@@ -1,11 +1,11 @@
 use std::fmt::Debug;
-
 use binrw::Error;
 
 #[derive(Debug)]
 pub(crate) enum DecodingError {
     VarintOverflow,
     IoError(std::io::ErrorKind),
+    NonUTF8String
 }
 
 impl std::fmt::Display for DecodingError {

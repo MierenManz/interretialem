@@ -10,7 +10,7 @@ macro_rules! impl_idx {
             inner: u32,
         }
         impl $name {
-            pub(crate) fn as_u32(&self) -> u32 {
+            pub(crate) const fn as_u32(&self) -> u32 {
                 self.inner
             }
         }

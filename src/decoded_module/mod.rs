@@ -4,3 +4,4 @@ mod instructions;
 mod module;
 mod parsers;
 mod types;
+mod sections;

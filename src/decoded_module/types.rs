@@ -48,7 +48,7 @@ pub(crate) struct ResultType {
     inner: Vec<ValType>,
 }
 impl ResultType {
-    pub(crate) fn as_slice(&self) -> &[ValType] {
+    fn as_slice(&self) -> &[ValType] {
         &self.inner
     }
 
@@ -71,19 +71,19 @@ pub(crate) struct FuncType {
     #[br(calc = [t_params.as_slice(), t_results.as_slice()].concat().into_boxed_slice())]
     inner: Box<[ValType]>,
 }
-impl FuncType {
-    pub(crate) fn params(&self) -> &[ValType] {
-        &self.inner[..self.param_count as usize]
-    }
+// impl FuncType {
+//     pub(crate) fn params(&self) -> &[ValType] {
+//         &self.inner[..self.param_count as usize]
+//     }
 
-    pub(crate) fn results(&self) -> &[ValType] {
-        &self.inner[self.param_count as usize..]
-    }
+//     pub(crate) fn results(&self) -> &[ValType] {
+//         &self.inner[self.param_count as usize..]
+//     }
 
-    pub(crate) const fn param_count(&self) -> u32 {
-        self.param_count
-    }
-}
+//     pub(crate) const fn param_count(&self) -> u32 {
+//         self.param_count
+//     }
+// }
 
 #[binread]
 #[derive(Debug, PartialEq)]
