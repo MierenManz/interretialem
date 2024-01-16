@@ -1,5 +1,5 @@
 mod types;
-mod values;
+mod parsers;
 mod module;
 mod indices;
 mod error;

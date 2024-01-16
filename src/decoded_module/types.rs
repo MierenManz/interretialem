@@ -1,10 +1,13 @@
+use std::cell::Ref;
+
 use binrw::binread;
-use super::values::parse_varuint32;
+use binrw::BinRead;
+use super::parsers::parse_varuint32;
 
 #[binread]
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 #[repr(u8)]
-#[br(repr = u8)]
+#[br(little, repr = u8)]
 pub(crate) enum NumType {
     I32 = 0x7F,
     I64 = 0x7E,
@@ -13,29 +16,48 @@ pub(crate) enum NumType {
 }
 
 #[binread]
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 #[repr(u8)]
-#[br(repr = u8)]
+#[br(little, repr = u8)]
 pub(crate) enum VecType {
     V128 = 0x7B,
 }
 
 #[binread]
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 #[repr(u8)]
-#[br(repr = u8)]
+#[br(little, repr = u8)]
 pub(crate) enum RefType {
     Funcref = 0x70,
     Externref = 0x6F,
 }
 
 #[binread]
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
+#[br(little)]
 pub(crate) enum ValType {
     Num(NumType),
     Vec(VecType),
     Ref(RefType)
 }
+
+impl From<NumType> for ValType {
+    fn from(value: NumType) -> Self {
+        Self::Num(value)
+    }
+}
+
+impl From<VecType> for ValType {
+    fn from(value: VecType) -> Self {
+        Self::Vec(value)
+    }
+}
+impl From<RefType> for ValType {
+    fn from(value: RefType) -> Self {
+        Self::Ref(value)
+    }
+}
+
 
 #[binread]
 pub(crate) struct ResultType {
@@ -97,4 +119,71 @@ pub(crate) struct GlobalType {
     #[br(calc = t == 1)]
     is_mut: bool,
     kind: ValType,
+}
+
+mod test {
+    use binrw::BinReaderExt;
+    use std::io::Cursor;
+    use binrw::BinRead;
+    use crate::decoded_module::types::{NumType, VecType, RefType, ValType};
+    #[test]
+    fn numtype() {
+        let buff: [u8; 1]= [0x7F];
+        let mut cursor = Cursor::new(buff);
+        assert_eq!(NumType::read(&mut cursor).unwrap(), NumType::I32);
+    }
+
+    #[test]
+    fn bad_numtype() {
+        let buff: [u8; 1] = [0x10];
+        let mut cursor = Cursor::new(buff);
+        assert!(NumType::read(&mut cursor).is_err());
+    }
+
+    #[test]
+    fn vectype() {
+        let buff: [u8; 1]= [0x7B];
+        let mut cursor = Cursor::new(buff);
+        assert_eq!(VecType::read(&mut cursor).unwrap(), VecType::V128);
+    }
+
+    #[test]
+    fn bad_vectype() {
+        let buff: [u8; 1] = [0x10];
+        let mut cursor = Cursor::new(buff);
+        assert!(NumType::read(&mut cursor).is_err());
+    }
+
+    #[test]
+    fn reftype() {
+        let buff: [u8; 1]= [0x70];
+        let mut cursor = Cursor::new(buff);
+        assert_eq!(RefType::read(&mut cursor).unwrap(), RefType::Funcref);
+    }
+
+    #[test]
+    fn bad_reftype() {
+        let buff: [u8; 1] = [0x10];
+        let mut cursor = Cursor::new(buff);
+        assert!(RefType::read(&mut cursor).is_err());
+    }
+
+    #[test]
+    fn valtype_num() {
+        let buf: [u8; 1] = [0x7F];
+        let mut cursor = Cursor::new(buf);
+        assert_eq!(ValType::read(&mut cursor).unwrap(), ValType::Num(NumType::I32));
+    }
+    #[test]
+    fn valtype_vec() {
+        let buf: [u8; 1] = [0x7B];
+        let mut cursor = Cursor::new(buf);
+        assert_eq!(ValType::read(&mut cursor).unwrap(), ValType::Vec(VecType::V128));
+    }
+    #[test]
+    fn valtype_ref() {
+        let buf: [u8; 1] = [0x70];
+        let mut cursor = Cursor::new(buf);
+        assert_eq!(ValType::read(&mut cursor).unwrap(), ValType::Ref(RefType::Funcref));
+    }
 }
