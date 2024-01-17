@@ -129,5 +129,7 @@ pub(crate) struct ExportSection {
 #[binread]
 #[br(magic = 8u8)]
 pub(crate) struct StartSection {
-    
+    #[br(temp, parse_with = parse_varuint32)]
+    size: u32,
+    index: FuncIndex,
 }
